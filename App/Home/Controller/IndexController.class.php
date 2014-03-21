@@ -68,7 +68,6 @@ class IndexController extends Controller {
 		$data['openid'] = $openid;
 		$data['tel'] = $tel;
 		$U->add($data);
-		echo $U->getLastSql();
 		$data1['openid'] = $openid;
 		$data1['bid'] = $id;
 		$data1['data'] = time();	
