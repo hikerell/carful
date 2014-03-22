@@ -5,13 +5,11 @@ use Think\Controller;
 class IndexController extends Controller {
 	public function index(){
 		$M = M('baby');
-		$data = $M->select();
+		$data = $M->select();	
 		foreach($data as $key=>$val){
-			$P = M('praise');
-			$data[$key]['praise'] = $P->where(array('bid'=>$val['id']))->count();
+			$data[$key]['rank'] = ($M->where('praise>%d',$val['praise'] )->count()+1);
 		}
-		
-		$this->assign('data',$data);
+		$this->assign('data',$data);		
 		$this->display();
 	}
 	
@@ -20,6 +18,35 @@ class IndexController extends Controller {
 		$count = $M->order('id desc')->find();
 		$this->assign('count',$count[id]+1);
 		$this->display();
+	}
+	
+	public function ajaxSearch(){
+		$keywords = $_POST['keywords'];
+		
+		$str = trim($keywords);
+		$temp=array('1','2','3','4','5','6','7','8','9','0');
+		$result='';
+		for($i=0;$i<strlen($str);$i++){
+        if(in_array($str[$i],$temp)){
+            $result.=$str[$i];
+			}
+		}
+
+		$M = M('baby');
+		$data = $M->where('id=%d',$result)->find();
+		$rank = $M->where('praise>%d',$data['praise'] )->count();
+		//echo $M->getLastSql();
+		if($data){
+			$content = "<div class=\"thumbnail\">
+				
+				<div id=\"praise\"><p class=\"noPraise\">".$data['praise']."</p><p class=\"rank\">".($rank+1)."</p></div>
+				<a href=\"__CONTROLLER__/show/id/".$data['id']."\"><img src=\"".$data['pic1']."\" /></a>
+				<div class=\"caption\">
+				   <h3>参赛宣言：".$data['content']."</h3>
+				</div>
+			  </div>";
+		}
+		echo $content;
 	}
 	
 	public function AddPublish(){
@@ -35,14 +62,30 @@ class IndexController extends Controller {
 		$data['content'] = $content;
 		$M = M('baby');
 		$M->add($data);
-		//var_dump($data);
+		var_dump($data);
+	}
+	
+	public function ajaxUpload(){		
+		$upload = new \Think\Upload();// 实例化上传类
+		$upload->maxSize   =     3145728 ;// 设置附件上传大小
+		$upload->exts      =     array('jpg', 'gif', 'png', 'jpeg');// 设置附件上传类型
+		$upload->savePath  =      '/bbs/'.$_SESSION['class']."/"; // 设置附件上传目录
+		// 上传文件 
+		$info   =   $upload->uploadOne($_FILES['uploadFile']);//upload();
+		if(!$info) {// 上传错误提示错误信息
+			$this->error($upload->getError());
+		}else{// 上传成功
+			echo json_encode($info);
+		}
+		//var_dump($_FILES['photo']);
 	}
 	
 	public function ajaxPraise(){
 		$openid = $_POST['openid'];
 		$id = $_POST['id'];
 		$praise = M('praise');		
-		$isPraise = $praise->where("bid=%d AND openid='%s'",array($id,$openid))->find();
+		$isPraise = $praise->where("bid=%d AND openid='%s'",array($id,$openid))->order('data desc')->find();
+		//var_dump($isPraise);
 		if(!$IsPraise){
 			if(date("YDM", time()) != date("YDM", $isPraise['data'])){//同一天
 				$data['openid'] = $openid;
@@ -52,6 +95,7 @@ class IndexController extends Controller {
 					echo 1;
 				}else{
 					$praise->add($data);
+					M('baby')->where('id=%d',$id)->setInc('praise',1);
 					echo 2;
 				}
 			}else{
@@ -72,6 +116,7 @@ class IndexController extends Controller {
 		$data1['bid'] = $id;
 		$data1['data'] = time();	
 		M('praise')->add($data1);
+		M('baby')->where('id=%d',$id)->setInc('praise',1);
 	}
 	public function show(){
 		$code = $_POST['code'];

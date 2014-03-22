@@ -9,5 +9,5 @@ return array(
 	'DB_PREFIX'    =>  'imicro_',     // 数据库表前缀
 	'DB_DSN'       =>  '',     // 数据库连接DSN 用于PDO方式
 	'DB_CHARSET'   =>  'utf8', // 数据库的编码 默认为utf8
-	'SHOW_PAGE_TRACE' =>true, // 显示页面Trace信息
+	//'SHOW_PAGE_TRACE' =>true, // 显示页面Trace信息
 );
