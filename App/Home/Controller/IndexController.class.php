@@ -7,7 +7,7 @@ class IndexController extends Controller {
 		$M = M('baby');
 		$data = $M->limit(0,10)->select();	
 		foreach($data as $key=>$val){
-			$data[$key]['rank'] = ($M->where('praise>%d',$val['praise'] )->count()+1);
+			$data[$key]['rank'] = ($M->where('praise>%d',$val['praise'] )->count()+1);//计算排名
 		}
 		$this->assign('data',$data);		
 		$this->display();
@@ -23,7 +23,7 @@ class IndexController extends Controller {
 	public function ajaxSearch(){
 		$keywords = $_POST['keywords'];
 		
-		$str = trim($keywords);
+		$str = trim($keywords); //截取字符串中的数字
 		$temp=array('1','2','3','4','5','6','7','8','9','0');
 		$result='';
 		for($i=0;$i<strlen($str);$i++){
@@ -55,7 +55,7 @@ class IndexController extends Controller {
 		$tel = $_POST['tel'];
 		$content = $_POST['content'];
 		$pic = $_POST['pic'];
-		foreach($pic as $key=>$val){
+		foreach($pic as $key=>$val){//遍历得到的图片数据
 			$data['pic'.$key] = $val;
 		}
 		$data['name'] = $name;
@@ -66,11 +66,11 @@ class IndexController extends Controller {
 		var_dump($data);
 	}
 	
-	public function ajaxShow(){
+	public function ajaxShow(){//ajax滚动数据
 		$page = $_POST['page'];
 		$data = $M->limit(($page-1)*10,10)->select();	
 		foreach($data as $key=>$val){
-			$data[$key]['rank'] = ($M->where('praise>%d',$val['praise'] )->count()+1);
+			$data[$key]['rank'] = ($M->where('praise>%d',$val['praise'] )->count()+1);//计算排名
 		}
 		$contents="";
 		foreach($data as $key){
@@ -151,7 +151,7 @@ class IndexController extends Controller {
 		M('praise')->add($data1);
 		M('baby')->where('id=%d',$id)->setInc('praise',1);
 	}
-	public function show(){
+	public function show(){//获取openid
 		$code = $_POST['code'];
 		$url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=wxe60a7669dfb88b33&secret=d6974889e28435c692522c3e7bb356e8&code=".$code."&grant_type=authorization_code";
 		$atjson=file_get_contents($url);
