@@ -137,19 +137,31 @@ $(document).ready(function(){
 		}
 		
 	$("#submit").live('click',function(){
-		var Data = {
-			name:$("#name").val(),
-			tel:$("#tel").val(),
-			content:$("#content").val(),
-			pic:imgArray
-		};
-		console.log(Data)
-		$.post('/carful/index.php/Home/Index/AddPublish', Data,
-		function(e) {		
-			//alert(e);
-			alert('提交成功');
-			window.location.href="/carful/index.php/Home/Index/index";
-		})
+		if($("#tel").val().length != 11)
+		{
+			alert('手机号输入不正确');
+		}else if($("#name").val() ==""){
+			alert('姓名输入不正确');
+		}else if(count == 0){
+			alert('最少上传一张照片');
+		}else if($("#content").val() ==""){
+			alert('参赛宣言输入不正确');
+		}
+		else{
+			var Data = {
+				name:$("#name").val(),
+				tel:$("#tel").val(),
+				content:$("#content").val(),
+				pic:imgArray
+			};
+			console.log(Data)
+			$.post('/carful/index.php/Home/Index/AddPublish', Data,
+			function(e) {		
+				//alert(e);
+				alert('提交成功');
+				window.location.href="/carful/index.php/Home/Index/index";
+			})
+		}
 	});
 });
 </script>
@@ -184,7 +196,7 @@ $(document).ready(function(){
 					<input type="file" class="on needsclick" style="z-index:200;opacity:0;filter:alpha(opacity=0);-ms-filter:'alpha(opacity=0)';" id="uploadFile" name="uploadFile" accept="image/*" single="">
 				</div>
 			</div>
-			<div id="submit">提交</div>
+			<button id="submit" style="margin-top:4px;width:80%;margin-left:10%;">提交</button>
           </div>
 		  
 		  <div class="thumbnail">

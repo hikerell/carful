@@ -5,10 +5,16 @@ use Think\Controller;
 class IndexController extends Controller {
 	public function index(){
 		$M = M('baby');
-		$data = $M->limit(0,10)->select();	
+		$top = $M->limit(0,3)->order('praise desc')->select();	
+		foreach($top as $key=>$val){
+			$top[$key]['rank'] = ($M->where('praise>%d',$val['praise'] )->count()+1);//计算排名
+		}
+		
+		$data = $M->limit(0,4)->where('id <> %d AND id <> %d AND id <> %d',array($top[0]['id'],$top[1]['id'],$top[2]['id']))->order('data desc')->select();	
 		foreach($data as $key=>$val){
 			$data[$key]['rank'] = ($M->where('praise>%d',$val['praise'] )->count()+1);//计算排名
 		}
+		$this->assign('top',$top);
 		$this->assign('data',$data);		
 		$this->display();
 	}
@@ -61,14 +67,17 @@ class IndexController extends Controller {
 		$data['name'] = $name;
 		$data['tel'] = $tel;
 		$data['content'] = $content;
+		$data['data'] = time();
 		$M = M('baby');
 		$M->add($data);
 		var_dump($data);
 	}
 	
 	public function ajaxShow(){//ajax滚动数据
-		$page = $_POST['page'];
-		$data = $M->limit(($page-1)*10,10)->select();	
+		$page = $_GET['page'];
+		$M = M('baby');
+		$top = $M->limit(0,3)->order('praise desc')->select();	
+		$data = $M->where('id <> %d AND id <> %d AND id <> %d',array($top[0]['id'],$top[1]['id'],$top[2]['id']))->order('data desc')->limit(($page-1)*4,4)->select();	
 		foreach($data as $key=>$val){
 			$data[$key]['rank'] = ($M->where('praise>%d',$val['praise'] )->count()+1);//计算排名
 		}
@@ -80,17 +89,17 @@ class IndexController extends Controller {
 						<table>
 						<tr>
 							<td><div style=\"width:5px;float:left;\">排名</div></td>
-							<td>".$data['rank']."</td>
+							<td>".$key['rank']."</td>
 						</tr>
 						<tr>
 							<td>赞</td>
-							<td>".$data['praise']."</td>
+							<td>".$key['praise']."</td>
 						</tr>
 						</table>
 						</div>
-							<a href=\"__CONTROLLER__/show/id/".$data['id']."\"><img src=\"".$data['pic1']."\" /></a>
+							<a href=\"__CONTROLLER__/show/id/".$key['id']."\"><img src=\"".$key['pic1']."\" /></a>
 						<div class=\"caption\">
-						   <h3>参赛宣言：".$data['content']."</h3>
+						   <h3>参赛宣言：".$key['content']."</h3>
 						</div>
 					</dl>
 				</li>";
@@ -102,7 +111,7 @@ class IndexController extends Controller {
 		$upload = new \Think\Upload();// 实例化上传类
 		$upload->maxSize   =     3145728 ;// 设置附件上传大小
 		$upload->exts      =     array('jpg', 'gif', 'png', 'jpeg');// 设置附件上传类型
-		$upload->savePath  =      '/bbs/'.$_SESSION['class']."/"; // 设置附件上传目录
+		$upload->savePath  =      '/baby/'.$_SESSION['class']."/"; // 设置附件上传目录
 		// 上传文件 
 		$info   =   $upload->uploadOne($_FILES['uploadFile']);//upload();
 		if(!$info) {// 上传错误提示错误信息
@@ -116,7 +125,10 @@ class IndexController extends Controller {
 	public function ajaxPraise(){
 		$openid = $_POST['openid'];
 		$id = $_POST['id'];
-		$praise = M('praise');		
+		$praise = M('praise');
+		if(empty($openid)){
+			$openid=0;
+		}
 		$isPraise = $praise->where("bid=%d AND openid='%s'",array($id,$openid))->order('data desc')->find();
 		//var_dump($isPraise);
 		if(!$IsPraise){
