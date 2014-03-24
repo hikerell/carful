@@ -5,7 +5,7 @@ use Think\Controller;
 class IndexController extends Controller {
 	public function index(){
 		$M = M('baby');
-		$data = $M->select();	
+		$data = $M->limit(0,10)->select();	
 		foreach($data as $key=>$val){
 			$data[$key]['rank'] = ($M->where('praise>%d',$val['praise'] )->count()+1);
 		}
@@ -64,6 +64,38 @@ class IndexController extends Controller {
 		$M = M('baby');
 		$M->add($data);
 		var_dump($data);
+	}
+	
+	public function ajaxShow(){
+		$page = $_POST['page'];
+		$data = $M->limit(($page-1)*10,10)->select();	
+		foreach($data as $key=>$val){
+			$data[$key]['rank'] = ($M->where('praise>%d',$val['praise'] )->count()+1);
+		}
+		$contents="";
+		foreach($data as $key){
+			$contents .="<li class=\"green bounceInDown\">						
+					<dl>
+						<div id=\"praise\">
+						<table>
+						<tr>
+							<td><div style=\"width:5px;float:left;\">排名</div></td>
+							<td>".$data['rank']."</td>
+						</tr>
+						<tr>
+							<td>赞</td>
+							<td>".$data['praise']."</td>
+						</tr>
+						</table>
+						</div>
+							<a href=\"__CONTROLLER__/show/id/".$data['id']."\"><img src=\"".$data['pic1']."\" /></a>
+						<div class=\"caption\">
+						   <h3>参赛宣言：".$data['content']."</h3>
+						</div>
+					</dl>
+				</li>";
+		}
+		echo $contents;
 	}
 	
 	public function ajaxUpload(){		
