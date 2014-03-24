@@ -175,7 +175,7 @@ $(document).ready(function(){
           </div>
 		  
 		  <div class="thumbnail">
-			<p>参赛编号：<input type="" value="carful<?php echo ($count); ?>" size=3 readonly="readonly" style="border:0;"/></p>
+			<p>参赛编号：<input type="" value="家福来宝贝<?php echo ($count); ?>号" readonly="readonly" style="border:0;"/></p>
 			<p>姓　　名：<input type="" id="name" value="" /></p>
 			<p>手　　机：<input type="" id="tel" value="" /></p>
 			<p>参赛宣言：<input type="" id="content" value="" /></p>
