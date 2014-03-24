@@ -21,8 +21,9 @@ summary {
   display: block;
 }
 @font-face {font-family: 'icomoon';src:url('./fonts/icomoon.eot?t={timestamp}');src:url('./fonts/icomoon.eot?t={timestamp}') format('embedded-opentype'),url('./fonts/icomoon.ttf?t={timestamp}') format('truetype'),url('./fonts/icomoon.woff?t={timestamp}') format('woff'),url('./fonts/icomoon.svg?t={timestamp}') format('svg');font-weight: normal;font-style: normal;}
-.iconT,.incoV,.incoS,.incoR,.leftInco,.upBtn,.incoTime,.expreSelect,.photoSelect,.infoInco,.iSucc,.iInco,.incoP,.incoA,.praise,.noPraise,.incoAnswer,.commF{font-family: 'icomoon';speak: none;font-style: normal;font-weight: normal;font-variant: normal;text-transform: none;line-height: 1;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing:grayscale;}
-.praise,.noPraise,.rank{color:#769cdc;}
+.iconT,.incoV,.incoS,.incoR,.leftInco,.upBtn,.incoTime,.expreSelect,.photoSelect,.infoInco,.iSucc,.iInco,.incoP,.incoA,.praise,.noPraise,.incoAnswer,.commF,.rank{font-family: 'icomoon';speak: none;font-style: normal;font-weight: normal;font-variant: normal;text-transform: none;line-height: 1;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing:grayscale;}
+.praise,.noPraise,.rank{color:#769cdc;font-size:18px;}
+.rank:before{content: "\e600";vertical-align:10%;}
 .praise:before{content: "\e617";vertical-align:10%;}
 .noPraise:before{content: "\e616";vertical-align:10%;}
 audio,

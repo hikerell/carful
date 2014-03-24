@@ -37,14 +37,15 @@ class IndexController extends Controller {
 		$rank = $M->where('praise>%d',$data['praise'] )->count();
 		//echo $M->getLastSql();
 		if($data){
-			$content = "<div class=\"thumbnail\">
-				
-				<div id=\"praise\"><p class=\"noPraise\">".$data['praise']."</p><p class=\"rank\">".($rank+1)."</p></div>
-				<a href=\"__CONTROLLER__/show/id/".$data['id']."\"><img src=\"".$data['pic1']."\" /></a>
-				<div class=\"caption\">
-				   <h3>参赛宣言：".$data['content']."</h3>
-				</div>
-			  </div>";
+			$content = "<li class=\"green bounceInDown\">						
+					<dl>
+						<div id=\"praise\"><p class=\"noPraise\">".$data['praise']."</p><p class=\"rank\">".($rank+1)."</p></div>
+							<a href=\"__CONTROLLER__/show/id/".$data['id']."\"><img src=\"".$data['pic1']."\" /></a>
+						<div class=\"caption\">
+						   <h3>参赛宣言：".$data['content']."</h3>
+						</div>
+					</dl>
+				</li>";
 		}
 		echo $content;
 	}
@@ -128,8 +129,9 @@ class IndexController extends Controller {
 		}else{
 			$id = $_GET['state'];
 		}		
-		$M = M('baby');
+		$M = M('baby');		
 		$data = $M->where(array('id'=>$id))->find();
+		$data['rank'] = ($M->where('praise>%d',$data['praise'] )->count()+1);
 		$this->assign('data',$data);
 		$this->assign('openid',$result['openid']);
 		$this->display();
