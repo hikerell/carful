@@ -120,7 +120,7 @@ $(document).ready(function(){
 		function uploadProgress(evt) {
 			if (evt.lengthComputable) {
 			var percentComplete = Math.round(evt.loaded/ evt.total);
-			$("img").css('opacity',percentComplete.toString());
+			$("img#pic"+count).css('opacity',percentComplete.toString());
 			console.log(percentComplete.toString())
 			}
 		}

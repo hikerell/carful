@@ -5,14 +5,14 @@ use Think\Controller;
 class IndexController extends Controller {
 	public function index(){
 		$M = M('baby');
-		$top = $M->limit(0,3)->order('praise desc')->select();	
+		$top = $M->where('ispass=1')->limit(0,3)->order('praise desc')->select();	
 		foreach($top as $key=>$val){
-			$top[$key]['rank'] = ($M->where('praise>%d',$val['praise'] )->count()+1);//计算排名
+			$top[$key]['rank'] = ($M->where('ispass=1 AND praise>%d',$val['praise'] )->count()+1);//计算排名
 		}
 		
-		$data = $M->limit(0,4)->where('id <> %d AND id <> %d AND id <> %d',array($top[0]['id'],$top[1]['id'],$top[2]['id']))->order('data desc')->select();	
+		$data = $M->limit(0,4)->where('ispass=1 AND id <> %d AND id <> %d AND id <> %d',array($top[0]['id'],$top[1]['id'],$top[2]['id']))->order('data desc')->select();	
 		foreach($data as $key=>$val){
-			$data[$key]['rank'] = ($M->where('praise>%d',$val['praise'] )->count()+1);//计算排名
+			$data[$key]['rank'] = ($M->where('ispass=1 AND praise>%d',$val['praise'] )->count()+1);//计算排名
 		}
 		$this->assign('top',$top);
 		$this->assign('data',$data);		
@@ -39,8 +39,8 @@ class IndexController extends Controller {
 		}
 
 		$M = M('baby');
-		$data = $M->where('id=%d',$result)->find();
-		$rank = $M->where('praise>%d',$data['praise'] )->count();
+		$data = $M->where('ispass=1 AND id=%d',$result)->find();
+		$rank = $M->where('ispass=1 AND praise>%d',$data['praise'] )->count();
 		//echo $M->getLastSql();
 		if($data){
 			$content = "<li class=\"green bounceInDown\">						
@@ -76,10 +76,10 @@ class IndexController extends Controller {
 	public function ajaxShow(){//ajax滚动数据
 		$page = $_GET['page'];
 		$M = M('baby');
-		$top = $M->limit(0,3)->order('praise desc')->select();	
-		$data = $M->where('id <> %d AND id <> %d AND id <> %d',array($top[0]['id'],$top[1]['id'],$top[2]['id']))->order('data desc')->limit(($page-1)*4,4)->select();	
+		$top = $M->where('ispass=1')->limit(0,3)->order('praise desc')->select();	
+		$data = $M->where('ispass=1 AND id <> %d AND id <> %d AND id <> %d',array($top[0]['id'],$top[1]['id'],$top[2]['id']))->order('data desc')->limit(($page-1)*4,4)->select();	
 		foreach($data as $key=>$val){
-			$data[$key]['rank'] = ($M->where('praise>%d',$val['praise'] )->count()+1);//计算排名
+			$data[$key]['rank'] = ($M->where('ispass=1 AND praise>%d',$val['praise'] )->count()+1);//计算排名
 		}
 		$contents="";
 		foreach($data as $key){
@@ -164,10 +164,14 @@ class IndexController extends Controller {
 		M('baby')->where('id=%d',$id)->setInc('praise',1);
 	}
 	public function show(){//获取openid
-		$code = $_POST['code'];
-		$url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=wxe60a7669dfb88b33&secret=d6974889e28435c692522c3e7bb356e8&code=".$code."&grant_type=authorization_code";
-		$atjson=file_get_contents($url);
-		$result=json_decode($atjson,true);
+		if($_POST['code']){
+			$code = $_POST['code'];
+			$url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=wxe60a7669dfb88b33&secret=d6974889e28435c692522c3e7bb356e8&code=".$code."&grant_type=authorization_code";
+			$atjson=file_get_contents($url);
+			$result=json_decode($atjson,true);
+		}else{
+			$data['praise'] = $_GET['wecha_id'];
+		}
 		if($_GET['id']){
 			$id = $_GET['id'];
 		}else{
@@ -175,7 +179,7 @@ class IndexController extends Controller {
 		}		
 		$M = M('baby');		
 		$data = $M->where(array('id'=>$id))->find();
-		$data['rank'] = ($M->where('praise>%d',$data['praise'] )->count()+1);
+		$data['rank'] = ($M->where('ispass=1 AND praise>%d',$data['praise'] )->count()+1);
 		$this->assign('data',$data);
 		$this->assign('openid',$result['openid']);
 		$this->display();
