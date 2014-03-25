@@ -77,7 +77,7 @@ class IndexController extends Controller {
 		$page = $_GET['page'];
 		$M = M('baby');
 		$top = $M->where('ispass=1')->limit(0,3)->order('praise desc')->select();	
-		$data = $M->where('ispass=1 AND id <> %d AND id <> %d AND id <> %d',array($top[0]['id'],$top[1]['id'],$top[2]['id']))->order('data desc')->limit(($page-1)*4,4)->select();	
+		$data = $M->where('ispass=1 AND id<>%d AND id<>%d AND id<>%d',array($top[0]['id'],$top[1]['id'],$top[2]['id']))->order('data desc')->limit(($page-1)*4,4)->select();	
 		foreach($data as $key=>$val){
 			$data[$key]['rank'] = ($M->where('ispass=1 AND praise>%d',$val['praise'] )->count()+1);//计算排名
 		}
@@ -111,12 +111,31 @@ class IndexController extends Controller {
 		$upload = new \Think\Upload();// 实例化上传类
 		$upload->maxSize   =     3145728 ;// 设置附件上传大小
 		$upload->exts      =     array('jpg', 'gif', 'png', 'jpeg');// 设置附件上传类型
-		$upload->savePath  =      '/baby/'.$_SESSION['class']."/"; // 设置附件上传目录
-		// 上传文件 
+		$upload->savePath  =      '/baby/'; // 设置附件上传目录
+		// 上传文件 		
 		$info   =   $upload->uploadOne($_FILES['uploadFile']);//upload();
 		if(!$info) {// 上传错误提示错误信息
 			$this->error($upload->getError());
 		}else{// 上传成功
+			//旋转图片
+			
+			$filename = '..'.__ROOT__.'/uploads'.$info[savepath].$info[savename];
+			$source = imagecreatefromjpeg($filename);
+			$exif = exif_read_data($filename);
+			if(!empty($exif['Orientation'])) {
+				switch($exif['Orientation']) {
+					case 8:
+						$source = imagerotate($source,90,0);
+						break;
+					case 3:
+						$source = imagerotate($source,180,0);
+						break;
+					case 6:
+						$source = imagerotate($source,-90,0);
+						break;
+				}
+			}
+			imagejpeg($source,$filename);
 			echo json_encode($info);
 		}
 		//var_dump($_FILES['photo']);
