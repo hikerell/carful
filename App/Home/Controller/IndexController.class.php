@@ -113,12 +113,12 @@ class IndexController extends Controller {
 		$upload->exts      =     array('jpg', 'gif', 'png', 'jpeg');// 设置附件上传类型
 		$upload->savePath  =      '/baby/'; // 设置附件上传目录
 		// 上传文件 		
-		$info   =   $upload->uploadOne($_FILES['uploadFile']);//upload();
+		$info   =   $upload->uploadOne($_FILES['Filedata']);//upload();
 		if(!$info) {// 上传错误提示错误信息
 			$this->error($upload->getError());
 		}else{// 上传成功
 			//旋转图片
-			
+			/*
 			$filename = '..'.__ROOT__.'/uploads'.$info[savepath].$info[savename];
 			$source = imagecreatefromjpeg($filename);
 			$exif = exif_read_data($filename);
@@ -136,6 +136,15 @@ class IndexController extends Controller {
 				}
 			}
 			imagejpeg($source,$filename);
+			*/
+			//强制旋转
+			/*
+			$filename = '..'.__ROOT__.'/uploads'.$info[savepath].$info[savename];
+			$source = imagecreatefromjpeg($filename);
+			$source = imagerotate($source,-90,0);
+			imagejpeg($source,$filename);
+			*/
+			//旋转结束
 			echo json_encode($info);
 		}
 		//var_dump($_FILES['photo']);
@@ -182,24 +191,21 @@ class IndexController extends Controller {
 		M('praise')->add($data1);
 		M('baby')->where('id=%d',$id)->setInc('praise',1);
 	}
-	public function show(){//获取openid
-		if($_POST['code']){
-			$code = $_POST['code'];
+	public function show(){
+		if($_GET['code']){//获取openid，判读是否是网页来的还是平台进来的
+			$code = $_GET['code'];
 			$url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=wxe60a7669dfb88b33&secret=d6974889e28435c692522c3e7bb356e8&code=".$code."&grant_type=authorization_code";
-			$atjson=file_get_contents($url);
+			$atjson=http_request($url);
 			$result=json_decode($atjson,true);
 		}else{
-			$data['praise'] = $_GET['wecha_id'];
+			$result['openid'] = $_GET['wecha_id'];
 		}
-		if($_GET['id']){
-			$id = $_GET['id'];
-		}else{
-			$id = $_GET['state'];
-		}		
+		$id = $_GET['id'];	
 		$M = M('baby');		
 		$data = $M->where(array('id'=>$id))->find();
 		$data['rank'] = ($M->where('ispass=1 AND praise>%d',$data['praise'] )->count()+1);
 		$this->assign('data',$data);
+		var_dump($atjson);
 		$this->assign('openid',$result['openid']);
 		$this->display();
 	}

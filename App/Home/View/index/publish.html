@@ -7,6 +7,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />	
 	<link rel="stylesheet" href="__PUBLIC__/css/bootstrap.css">	
 	<js href="__PUBLIC__/js/jquery.min.js" />
+	<js href="__PUBLIC__/js/uploadfive/jquery.uploadifive.min.js" />
+	<link rel="stylesheet" href="__PUBLIC__/js/uploadfive/uploadifive.css">	
  	<title></title>
 	<style type="text/css">
       .head {
@@ -84,65 +86,7 @@
 	var base;
 $(document).ready(function(){
 
-	$("#uploadFile").change(function(){		
-		var fd = new FormData();
-        fd.append("uploadFile", document.getElementById('uploadFile').files[0]);
-		var xhr = new XMLHttpRequest();
-		/* event listners */
-		file=this.files[0];		
-		xhr.upload.addEventListener("progress", uploadProgress, false);
-		xhr.addEventListener("loadstart", uploadStart, false); //开始
-		xhr.addEventListener("load", uploadComplete, false);
-		//console.log(xhr);
-		/* Be sure to change the url below to the url of your upload server side script */
-		xhr.open("POST", "__CONTROLLER__/ajaxUpload");
-		xhr.send(fd);
-		console.log('对象：',xhr);
-	});
-
- 
-		function uploadStart(evt){
-			//alert(3);
-			$('.on').css('display','none');
-			var reader = new FileReader(); 
-			reader.readAsDataURL(file); 				
-			reader.onload = function(e){ 
-				base = this.result; 
-				if(base.substring(5,10) != "image"){
-					var arr = base.split("base64,");	
-					var arr1 =file.name.split(".");
-					if(arr1[1] == "jpg"){
-						arr1[1] = "jpeg";
-					}
-					arr[0] = arr[0] +"image/"+ arr1[1]+";base64";		
-					base= arr.join();
-				}
-			$("<img id=\"pic"+count+"\" src=\""+base+"\" style=\"width:60px;height:60px;opacity:0.2\"/>").appendTo("#PicLi");			
-			//alert(1);
-			}					
-		}
-		//进度条
-		function uploadProgress(evt) {
-			if (evt.lengthComputable) {
-			var percentComplete = Math.round(evt.loaded/ evt.total);
-			//$("img#pic"+count).css('opacity',percentComplete.toString());
-			}
-		}
-		//上传完成
-		function uploadComplete(evt) {
-		//alert(2);
-		/* This event is raised when the server send back a response */
-		var json = evt.target.responseText;
-		var data = eval('(' + json + ')');	
-		$("img#pic"+count).css('opacity','1');
-		$('.on').css('display','block');
-				count++;
-		imgArray[count] = "__ROOT__/uploads"+data.savepath+data.savename;
-				//alert(data.savename);
-		if(count==3){
-				$('.on').css('display','none');
-			}
-		}
+	
 		
 	$("#submit").live('click',function(){
 		if($("#tel").val().length != 11)
@@ -197,11 +141,34 @@ $(document).ready(function(){
 			<p>姓　　名：<input type="" id="name" value="" /></p>
 			<p>手　　机：<input type="" id="tel" value="" /></p>
 			<p>参赛宣言：<input type="" id="content" value="" /></p>
+			<div id="queue" style="dispaly:block"></div>
 			<div id="PicLi">
 				<div class="on" id="addPic">
-					<input type="file" class="on needsclick" style="z-index:200;opacity:0;filter:alpha(opacity=0);-ms-filter:'alpha(opacity=0)';" id="uploadFile" name="uploadFile" accept="image/*" single="">
+					<input type="file" id="uploadFile" name="uploadFile" accept="image/*" single="">
 				</div>
-			</div>
+			<script type="text/javascript">
+				$(function() {
+					$('#uploadFile').uploadifive({
+						'auto'             : true,
+						'queueID'          : 'queue',
+						'uploadScript'     : '__CONTROLLER__/ajaxUpload',
+						'onUploadComplete' : function(file, data) { 
+								var data = eval('(' + data + ')');
+								count++;
+								imgArray[count] = "__ROOT__/uploads"+data.savepath+data.savename;
+								
+								$("<img id=\"pic"+count+"\" src=\""+imgArray[count]+"\" style=\"width:60px;height:60px;\"/>").appendTo("#PicLi");		
+								//alert(data.savename);
+								if(count==3){
+									$('.on').css('display','none');
+								}
+								$("#uploadifive-uploadFile-file-"+(count-1)).css('display','none');
+							}
+					});
+				});
+			</script>
+			</div>	
+		
 			<button id="submit" style="margin-top:4px;width:80%;margin-left:10%;">提交</button>
           </div>
 		  
