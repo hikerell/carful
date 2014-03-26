@@ -48,11 +48,11 @@ class IndexController extends Controller {
 					<dl>
 						<div id=\"praise\">
 						<table>
-						<tr>
+						<tr style=\"color:blue\">
 							<td><div style=\"width:5px;float:left;\">排名</div></td>
 							<td>".($rank+1)."</td>
 						</tr>
-						<tr>
+						<tr style=\"color:#FF6600\">
 							<td>赞</td>
 							<td>".$data['praise']."</td>
 						</tr>
