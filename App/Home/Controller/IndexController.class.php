@@ -43,9 +43,21 @@ class IndexController extends Controller {
 		$rank = $M->where('ispass=1 AND praise>%d',$data['praise'] )->count();
 		//echo $M->getLastSql();
 		if($data){
-			$content = "<li class=\"green bounceInDown\">						
+			$content = "
+				<li class=\"green bounceInDown\">						
 					<dl>
-						<div id=\"praise\"><p class=\"noPraise\">".$data['praise']."</p><p class=\"rank\">".($rank+1)."</p></div>
+						<div id=\"praise\">
+						<table>
+						<tr>
+							<td><div style=\"width:5px;float:left;\">排名</div></td>
+							<td>".($rank+1)."</td>
+						</tr>
+						<tr>
+							<td>赞</td>
+							<td>".$data['praise']."</td>
+						</tr>
+						</table>
+						</div>
 							<a href=\"__CONTROLLER__/show/id/".$data['id']."\"><img src=\"".$data['pic1']."\" /></a>
 						<div class=\"caption\">
 						   <h3>参赛宣言：".$data['content']."</h3>
