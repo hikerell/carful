@@ -195,7 +195,13 @@ class IndexController extends Controller {
 		if($_GET['code']){//获取openid，判读是否是网页来的还是平台进来的
 			$code = $_GET['code'];
 			$url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=wxe60a7669dfb88b33&secret=d6974889e28435c692522c3e7bb356e8&code=".$code."&grant_type=authorization_code";
-			$atjson=http_request($url);
+			//$atjson=http_request($url);
+			$ch = curl_init();
+			curl_setopt ($ch, CURLOPT_URL, $url);
+			curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+			$atjson = curl_exec($ch);
 			$result=json_decode($atjson,true);
 		}else{
 			$result['openid'] = $_GET['wecha_id'];
@@ -205,7 +211,7 @@ class IndexController extends Controller {
 		$data = $M->where(array('id'=>$id))->find();
 		$data['rank'] = ($M->where('ispass=1 AND praise>%d',$data['praise'] )->count()+1);
 		$this->assign('data',$data);
-		var_dump($atjson);
+		//var_dump($atjson);
 		$this->assign('openid',$result['openid']);
 		$this->display();
 	}
