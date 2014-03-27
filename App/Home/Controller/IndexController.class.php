@@ -4,6 +4,22 @@ namespace Home\Controller;
 use Think\Controller;
 class IndexController extends Controller {
 	public function index(){
+	
+		if($_GET['code']){//获取openid，判读是否是网页来的还是平台进来的
+			$code = $_GET['code'];
+			$url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=wxe60a7669dfb88b33&secret=d6974889e28435c692522c3e7bb356e8&code=".$code."&grant_type=authorization_code";
+			//$atjson=http_request($url);
+			$ch = curl_init();
+			curl_setopt ($ch, CURLOPT_URL, $url);
+			curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+			$atjson = curl_exec($ch);
+			$result=json_decode($atjson,true);
+		}else{
+			$result['openid'] = $_GET['wecha_id'];
+		}
+		
 		$M = M('baby');
 		$top = $M->where('ispass=1')->limit(0,3)->order('praise desc')->select();	
 		foreach($top as $key=>$val){
@@ -14,21 +30,40 @@ class IndexController extends Controller {
 		foreach($data as $key=>$val){
 			$data[$key]['rank'] = ($M->where('ispass=1 AND praise>%d',$val['praise'] )->count()+1);//计算排名
 		}
+		$this->assign('openid',$result['openid']);
 		$this->assign('top',$top);
 		$this->assign('data',$data);		
 		$this->display();
 	}
 	
 	public function publish(){
+	
+		if($_GET['code']){//获取openid，判读是否是网页来的还是平台进来的
+			$code = $_GET['code'];
+			$url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=wxe60a7669dfb88b33&secret=d6974889e28435c692522c3e7bb356e8&code=".$code."&grant_type=authorization_code";
+			//$atjson=http_request($url);
+			$ch = curl_init();
+			curl_setopt ($ch, CURLOPT_URL, $url);
+			curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+			$atjson = curl_exec($ch);
+			$result=json_decode($atjson,true);
+		}else{
+			$result['openid'] = $_GET['wecha_id'];
+		}
+		
+		
 		$M = M('baby');
 		$count = $M->order('id desc')->find();
 		$this->assign('count',$count[id]+1);
+		$this->assign('openid',$result['openid']);
 		$this->display();
 	}
 	
 	public function ajaxSearch(){
 		$keywords = $_POST['keywords'];
-		
+		$openid = $_POST['openid'];
 		$str = trim($keywords); //截取字符串中的数字
 		$temp=array('1','2','3','4','5','6','7','8','9','0');
 		$result='';
@@ -42,23 +77,20 @@ class IndexController extends Controller {
 		$data = $M->where('ispass=1 AND id=%d',$result)->find();
 		$rank = $M->where('ispass=1 AND praise>%d',$data['praise'] )->count();
 		//echo $M->getLastSql();
+		//$content="请输入正确的参赛编号";
 		if($data){
 			$content = "
 				<li class=\"green bounceInDown\">						
 					<dl>
 						<div id=\"praise\">
 						<table>
-						<tr style=\"color:blue\">
-							<td><div style=\"width:5px;float:left;\">排名</div></td>
-							<td>".($rank+1)."</td>
-						</tr>
-						<tr style=\"color:#FF6600\">
-							<td>赞</td>
-							<td>".$data['praise']."</td>
+						<tr>
+							<td style=\"color:blue\">排名".($rank+1)."</td>
+							<td style=\"color:#FF6600;padding-left:10%;\">赞".$data['praise']."</td>
 						</tr>
 						</table>
 						</div>
-							<a href=\"__CONTROLLER__/show/id/".$data['id']."\"><img src=\"".$data['pic1']."\" /></a>
+							<a href=\"".__CONTROLLER__."/show/id/".$data['id']."/wecha_id/".$openid."\"><img src=\"".$data['pic1']."\" /></a>
 						<div class=\"caption\">
 						   <h3>参赛宣言：".$data['content']."</h3>
 						</div>
@@ -68,10 +100,43 @@ class IndexController extends Controller {
 		echo $content;
 	}
 	
+	//我的作品
+	public function Mybaby(){
+		$openid = $_POST['openid'];
+		$M = M('baby');
+		$data = $M->where('ispass=1 AND openid="%s"',$openid)->select();
+		//echo $M->getLastSql();		
+		if($data){
+		$content="";
+			foreach($data as $val){
+				$rank = $M->where('ispass=1 AND praise>%d',$val['praise'] )->count();
+				$content .= "
+					<li class=\"green bounceInDown\">						
+					<dl>
+						<div id=\"praise\">
+						<table>
+						<tr>
+							<td style=\"color:blue\">排名".($rank+1)."</td>
+							<td style=\"color:#FF6600;padding-left:10%;\">赞".$data['praise']."</td>
+						</tr>
+						</table>
+						</div>
+							<a href=\"".__CONTROLLER__."/show/id/".$data['id']."/wecha_id/".$openid."\"><img src=\"".$data['pic1']."\" /></a>
+						<div class=\"caption\">
+						   <h3>参赛宣言：".$data['content']."</h3>
+						</div>
+					</dl>
+				</li>";
+			}
+		}
+		echo $content;
+	}
+	
 	public function AddPublish(){
 		$name = $_POST['name'];
 		$tel = $_POST['tel'];
 		$content = $_POST['content'];
+		$openid = $_POST['openid'];
 		$pic = $_POST['pic'];
 		foreach($pic as $key=>$val){//遍历得到的图片数据
 			$data['pic'.$key] = $val;
@@ -80,6 +145,7 @@ class IndexController extends Controller {
 		$data['tel'] = $tel;
 		$data['content'] = $content;
 		$data['data'] = time();
+		$data['openid'] = $openid;
 		$M = M('baby');
 		$M->add($data);
 		var_dump($data);
