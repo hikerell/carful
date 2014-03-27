@@ -117,13 +117,13 @@ class IndexController extends Controller {
 						<table>
 						<tr>
 							<td style=\"color:blue\">排名".($rank+1)."</td>
-							<td style=\"color:#FF6600;padding-left:10%;\">赞".$data['praise']."</td>
+							<td style=\"color:#FF6600;padding-left:10%;\">赞".$val['praise']."</td>
 						</tr>
 						</table>
 						</div>
-							<a href=\"".__CONTROLLER__."/show/id/".$data['id']."/wecha_id/".$openid."\"><img src=\"".$data['pic1']."\" /></a>
+							<a href=\"".__CONTROLLER__."/show/id/".$val['id']."/wecha_id/".$openid."\"><img src=\"".$val['pic1']."\" /></a>
 						<div class=\"caption\">
-						   <h3>参赛宣言：".$data['content']."</h3>
+						   <h3>参赛宣言：".$val['content']."</h3>
 						</div>
 					</dl>
 				</li>";
